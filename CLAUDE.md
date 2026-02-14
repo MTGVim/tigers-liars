@@ -41,3 +41,160 @@ AR"을 호출할 수 있는 시간은 30초입니다. 카드가 하나 이상 �
 라운드의 테이블 유형이 조커인 경우, 다음 번에 라이어 덱을 섞을 때까지 조커를 테이블 덱에서 일시적으로 제거해야 합니다.
 첫 번째 라운드가 끝난 후, 새로운 라운드의 첫 번째 플레이어가 "악마의 거래"라고 불리는 플레이어에게 배정되거나, 대신 일반 배정이 이루어집니다. 그 선수가 방금 탈락한 경우, 다음으로 탈락하지 않은 빈손이 아닌 선수가 순서대로 새로운 라운드를 시작해야 합니다.
 
+
+{
+  "game": {
+    "title": "Liar's Bar",
+    "modes": [
+      {
+        "id": "liars_deck",
+        "name": "Liar's Deck",
+        "summary": "Players place 1-3 face-down cards each turn claiming they match the round's table rank. On a challenge, cards are revealed; liar or challenger takes a Russian-roulette penalty.",
+        "setup": {
+          "players": { "min": 2, "max": 4 },
+          "deck": {
+            "cardsTotal": 20,
+            "composition": {
+              "A": 6,
+              "K": 6,
+              "Q": 6,
+              "JOKER": 2
+            },
+            "jokerRule": "JOKER counts as any table rank for truth checking."
+          },
+          "startingHandSize": 5,
+          "roundTableRank": {
+            "values": ["A", "K", "Q"],
+            "selection": "Random each round and publicly shown."
+          },
+          "turnTimerSeconds": 30,
+          "penalty": {
+            "type": "russian_roulette",
+            "cylinderSize": 6,
+            "bulletCount": 1,
+            "eliminationOnBullet": true
+          }
+        },
+        "coreLoop": [
+          "ROUND_START: Select and show TableRank (A/K/Q). Shuffle deck. Deal 5 cards to each alive player.",
+          "PLAYER_TURN: Active player either (a) plays 1-3 cards face-down claiming they are TableRank, or (b) challenges the previous play by calling Liar.",
+          "CHALLENGE_RESOLVE: If challenge happens, reveal previous play and evaluate truth.",
+          "PENALTY_RESOLVE: Loser of challenge performs Russian roulette; if bullet fires, they are eliminated.",
+          "ROUND_CONTINUE: Next alive player acts until win condition met."
+        ],
+        "actions": {
+          "PLAY_CARDS": {
+            "by": "activePlayer",
+            "params": { "count": { "min": 1, "max": 3 } },
+            "effect": "Place selected cards face-down into a central pile; implicitly claims all are TableRank (JOKER allowed)."
+          },
+          "CALL_LIAR": {
+            "by": "activePlayer",
+            "preconditions": [
+              "There must be a previous unresolved play in the current round.",
+              "Only callable on your own turn."
+            ],
+            "effect": "Immediately reveal the previous play and resolve truth check."
+          }
+        },
+        "truthCheck": {
+          "input": "previousPlay.cards",
+          "tableRank": "A|K|Q",
+          "rule": "A play is TRUE only if every revealed card is either TableRank or JOKER; otherwise the play is FALSE."
+        },
+        "challengeOutcome": {
+          "ifPlayIsTrue": {
+            "penalizedPlayer": "challenger",
+            "reason": "False accusation (challenged a truthful play)."
+          },
+          "ifPlayIsFalse": {
+            "penalizedPlayer": "previousPlayer",
+            "reason": "Caught lying (at least one card did not match TableRank and was not JOKER)."
+          }
+        },
+        "penaltyResolution": {
+          "roulette": {
+            "model": "6-chamber, 1 bullet",
+            "procedure": [
+              "Penalized player triggers the roulette action once.",
+              "If bullet fires: player is eliminated immediately.",
+              "If empty chamber: player survives and round continues."
+            ]
+          }
+        },
+        "roundAndEndRules": {
+          "handEmptyRule": "If a player's hand reaches 0, they are considered 'safe' for the remainder of the round (they no longer need to play cards).",
+          "forcedChallengeRule": "When only one player still has cards in hand (others are empty/safe), that remaining player must be challenged (a Call Liar must occur) to resolve the round.",
+          "winCondition": "Last remaining alive player wins the match."
+        },
+        "variants": [
+          {
+            "id": "non_lethal_penalty",
+            "name": "Non-lethal penalty (optional)",
+            "description": "Replace roulette elimination with 2-strike system (e.g., 'poison' tokens). On penalty, gain 1 strike; at 2 strikes, eliminated."
+          }
+        ]
+      },
+      {
+        "id": "liars_dice",
+        "name": "Liar's Dice",
+        "summary": "Players bid on how many dice of a given face exist across all players. On challenge, dice are revealed; loser drinks poison, and 2 poisons eliminate.",
+        "setup": {
+          "players": { "min": 2, "max": 4 },
+          "dicePerPlayer": 5,
+          "bid": {
+            "quantity": { "min": 1 },
+            "faceValues": [1, 2, 3, 4, 5, 6],
+            "wildOnes": false
+          },
+          "turnTimerSeconds": 30,
+          "penalty": {
+            "type": "poison",
+            "strikesToEliminate": 2
+          }
+        },
+        "coreLoop": [
+          "ROUND_START: All players roll their dice secretly.",
+          "PLAYER_TURN: Active player either increases the bid (higher quantity or higher face as allowed) or challenges the previous bid by calling Liar.",
+          "CHALLENGE_RESOLVE: Reveal all dice and count matching face; determine if previous bid was true.",
+          "PENALTY_RESOLVE: If previous bid was false, previous bidder takes poison; if previous bid was true, challenger takes poison.",
+          "END: A player with 2 poison strikes is eliminated; last alive player wins."
+        ],
+        "actions": {
+          "MAKE_BID": {
+            "by": "activePlayer",
+            "params": {
+              "quantity": "integer>=1",
+              "face": "1-6"
+            },
+            "constraints": [
+              "Bid must be strictly higher than previous bid by rules: either higher quantity, or same quantity with higher face (implementation-defined ordering)."
+            ]
+          },
+          "CALL_LIAR": {
+            "by": "activePlayer",
+            "preconditions": ["There must be a previous bid."],
+            "effect": "Reveal all dice and resolve bid truth."
+          }
+        },
+        "truthCheck": {
+          "rule": "Previous bid is TRUE if total count of the bid face across all dice is >= bid.quantity."
+        },
+        "challengeOutcome": {
+          "ifBidIsTrue": { "penalizedPlayer": "challenger" },
+          "ifBidIsFalse": { "penalizedPlayer": "previousBidder" }
+        },
+        "penaltyResolution": {
+          "poison": {
+            "procedure": [
+              "Penalized player gains 1 poison strike.",
+              "At 2 poison strikes, the player is eliminated."
+            ]
+          }
+        },
+        "winCondition": "Last remaining alive player wins the match."
+      }
+    ]
+  }
+}
+

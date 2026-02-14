@@ -1,4 +1,4 @@
-# Ace Table - Liars Game
+# Tiger's Table - Liars Game
 
 Next.js + Tailwind frontend and WebSocket room server.
 

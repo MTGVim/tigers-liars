@@ -296,7 +296,7 @@ export default function Home() {
       )}
 
       <section className="glass rounded-2xl p-5">
-        <h1 className="text-3xl text-amber-100 md:text-4xl">Ace Table: Liar&apos;s Deck</h1>
+        <h1 className="text-3xl text-amber-100 md:text-4xl">Tiger&apos;s Table: Liar&apos;s Deck</h1>
         <p className="mt-2 text-sm text-amber-200/80">상태: {connected ? 'connected' : 'connecting...'} | 서버: {wsUrl}</p>
       </section>
 
@@ -409,7 +409,7 @@ export default function Home() {
                       <img
                         src={`/cards/${cardName}.png`}
                         alt={cardName}
-                        className="pointer-events-none absolute left-1/2 top-1/2 h-24 w-36 -translate-x-1/2 -translate-y-1/2 rotate-90 object-contain"
+                        className="pointer-events-none absolute left-1/2 top-1/2 h-36 w-24 -translate-x-1/2 -translate-y-1/2 object-contain"
                       />
                     </div>
                   </button>

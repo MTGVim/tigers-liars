@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Ace Table - Liars Game',
+  title: "Tiger's Table - Liars Game",
   description: 'WebSocket room based liars game',
 };
 
