@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Trebuchet MS', 'Apple SD Gothic Neo', 'Noto Sans CJK KR', sans-serif;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 171, 64, 0.22), transparent 30%),
+    radial-gradient(circle at 80% 80%, rgba(166, 74, 30, 0.27), transparent 35%),
+    linear-gradient(145deg, #0e0908 10%, #1e120d 45%, #24130f 100%);
+  color: #f8e4c7;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.glass {
+  background: linear-gradient(160deg, rgba(64, 36, 21, 0.78), rgba(20, 10, 7, 0.78));
+  border: 1px solid rgba(246, 183, 91, 0.3);
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+}

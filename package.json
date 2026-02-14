@@ -1,0 +1,26 @@
+{
+  "name": "tiger-liars",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "ws": "node server/ws-server.mjs"
+  },
+  "dependencies": {
+    "next": "^16.1.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "ws": "8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.49",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.3"
+  }
+}
